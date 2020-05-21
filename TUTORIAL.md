@@ -27,52 +27,58 @@ This should create a `mysite` directory in your current directory.
 Let’s look at what `blitz new` created:
 
 ```
-mysite/
-  app/
-    components/
-      ErrorBoundary.tsx
-    layouts/
-    pages/
-      _app.tsx
-      _document.tsx
-      index.tsx
-  db/
-  integrations/
-  jobs/
-  node_modules/
-  public/
-  utils/
-  .babelrc.js
-  .env
-  .eslintrc.js
-  .gitignore
-  .npmrc
-  .prettierignore
-  blitz.config.js
-  package.json
-  README.md
-  tsconfig.json
+mysite
+├── app
+│   ├── components
+│   │   └── ErrorBoundary.tsx
+│   ├── layouts
+│   └── pages
+│       ├── _app.tsx
+│       ├── _document.tsx
+│       └── index.tsx
+├── db
+│   ├── migrations
+│   ├── index.ts
+│   └── schema.prisma
+├── integrations
+├── jobs
+├── node_modules
+├── public
+│   ├── favicon.ico
+│   └── logo.png
+├── utils
+├── .babelrc.js
+├── .env
+├── .eslintrc.js
+├── .gitignore
+├── .npmrc
+├── .prettierignore
+├── README.md
+├── blitz.config.js
+├── package.json
+├── tsconfig.json
+└── yarn.lock
 ```
 
 These files are:
 
-- The `app/` directory is a container for most of your project. This is where you’ll put any pages or api routes.
+- The `app/` directory is a container for most of your project. This is where you’ll put any pages or API routes.
 
 - `db`/ is where your database configuration goes. If you’re writing models or checking migrations, this is where to go.
 
-- `node_modules/` is where your “dependencies” are stored. This is an auto-generated directory, so you don’t have to worry too much about it.
+- `node_modules/` is where your “dependencies” are stored. This directory is updated by your package manager, so you don’t have to worry too much about it.
 
 - `public/` is a directory where you will put any static assets. If you have images, files, or videos which you want to use in your app, this is where to put them.
 
-- `utils/` is a good place to put any share util files which you might use across different sections of your app.
+- `utils/` is a good place to put any shared utility files which you might use across different sections of your app.
 
-- `dotfiles (.babelrc.js, .env, etc)` are configuration files for various bits of JavaScript tooling.
+- `.babelrc.js`, `.env`, etc. ("dotfiles") are configuration files for various bits of JavaScript tooling.
 
 - `blitz.config.js` is for advanced custom configuration of Blitz. It extends [`next.config.js`](https://nextjs.org/docs/api-reference/next.config.js/introduction).
 
 - `package.json` contains information about your dependencies and devDependencies. If you’re using a tool like `npm` or `yarn`, you won’t have to worry about this much.
 
-- `tsconfig.json` - is our recommended setup for TypeScript.
+- `tsconfig.json` is our recommended setup for TypeScript.
 
 ## The development server
 
@@ -122,7 +128,7 @@ By default, the apps is created with SQLite. If you’re new to databases, or yo
 
 ## Creating models
 
-Now we’ll define your models—essentially, your database layout, with additional metadata.
+Now we’ll define your models — essentially your database layout — with additional metadata.
 
 In `schema.prisma`, we’ll create two models: `Question`, and `Choice`. A `Question` has a question and a publication date. A `Choice` has two fields: the text of the choice and a vote count. Each has an id, and each `Choice` is associated with a `Question`.
 
@@ -174,14 +180,17 @@ Once you’re in the console, explore the Database API:
 []
 
 # Create a new Question.
-⚡ > q = db.question.create({data: {text: 'What’s new?', publishedAt: new Date()}}).then(console.log)
-{ id: 1, text: 'What’s new?', publishedAt: 2020-04-24T22:08:17.307Z }
+⚡ > let q
+undefined
 
-# Now it has an ID.
-⚡ > q.id
-1
+⚡ > db.question.create({data: {text: 'What’s new?', publishedAt: new Date()}}).then(res => q = res)
+Promise { <pending> }
 
-# Access model field values via JavaScript attributes.
+# See the entire object
+⚡ > q
+{ id: 1, text: "What’s new?", publishedAt: 2020-04-24T22:08:17.307Z }
+
+# Or access individual values on the object.
 ⚡ > q.text
 "What’s new?"
 
@@ -189,11 +198,15 @@ Once you’re in the console, explore the Database API:
 2020-04-24T22:08:17.307Z
 
 # Change values by using the update function
-⚡ > q = db.question.update({where: {id: 1}, data: {text: 'What’s up?'}}).then(console.log)
+⚡ > db.question.update({where: {id: 1}, data: {text: 'What’s up?'}}).then(res => q = res)
+Promise { <pending> }
+
+# See the result
+⚡ > q
 { id: 1, text: 'What’s up?', publishedAt: 2020-04-24T22:08:17.307Z }
 
-# db.questions.findMany() displays all the questions in the database.
-⚡ > db.questions.findMany().then(console.log)
+# db.question.findMany() displays all the questions in the database.
+⚡ > db.question.findMany().then(console.log)
 [
   { id: 1, text: 'What’s up?', publishedAt: 2020-04-24T22:08:17.307Z }
 ]
@@ -201,23 +214,23 @@ Once you’re in the console, explore the Database API:
 
 ## Writing more pages
 
-Let’s create some more pages. Blitz provides a handy utility for scaffolding out pages, called `generate`. Let’s run it now with our Question model:
+Let’s create some more pages. Blitz provides a handy utility for scaffolding out pages, called `generate`. Let’s run it now with our `Question` model:
 
 ```sh
 $ blitz generate all question
 ```
 
-Great! Before running the app again, we need to customise some of these pages which have just been generated. Open your text editor and look at `app/questions/pages/index.tsx`. Notice that a `QuestionsList` component has been generated for you:
+Great! Before running the app again, we need to customise some of these pages which have just been generated. Open your text editor and look at `app/questions/pages/questions/index.tsx`. Notice that a `QuestionsList` component has been generated for you:
 
 ```jsx
 export const QuestionsList = () => {
-  const [questions] = useQuery(getQuestions)
+  const [questions] = useQuery(getQuestions, {})
 
   return (
     <ul>
       {questions.map((question) => (
         <li key={question.id}>
-          <Link href="/questions/[id]" as={`/questions/${question.id}`}>
+          <Link href="/questions/[questionId]" as={`/questions/${question.id}`}>
             <a>{question.name}</a>
           </Link>
         </li>
@@ -227,17 +240,17 @@ export const QuestionsList = () => {
 }
 ```
 
-This won’t work though! Remember that the Question model we created above doesn’t have any `name` field. To fix this, replace `question.name` with `question.text`:
+This won’t work though! Remember that the `Question` model we created above doesn’t have any `name` field. To fix this, replace `question.name` with `question.text`:
 
 ```jsx
 export const QuestionsList = () => {
-  const [questions] = useQuery(getQuestions)
+  const [questions] = useQuery(getQuestions, {})
 
   return (
     <ul>
       {questions.map((question) => (
         <li key={question.id}>
-          <Link href="/questions/[id]" as={`/questions/${question.id}`}>
+          <Link href="/questions/[questionId]" as={`/questions/${question.id}`}>
             <a>{question.text}</a>
           </Link>
         </li>
@@ -261,7 +274,7 @@ const question = await createQuestion({
 })
 ```
 
-Finally, we just need to fix the edit page. Open `app/questions/pages/questions/[id]/edit.tsx` and replace
+Finally, we just need to fix the edit page. Open `app/questions/pages/questions/[questionId]/edit.tsx` and replace
 
 ```jsx
 const updated = await updateQuestion({
@@ -283,7 +296,7 @@ Great! Now make sure your app is running. If it isn’t, just run `blitz start` 
 
 ## Writing a minimal form
 
-You’re doing great so far! The next thing we’ll do is give our form some real inputs. At the moment it’s giving every Question the same name! Have a look at `app/questions/pages/questions/new.tsx` in your editor.
+You’re doing great so far! The next thing we’ll do is give our form some real inputs. At the moment it’s giving every `Question` the same name! Have a look at `app/questions/pages/questions/new.tsx` in your editor.
 
 Delete the div that says: `<div>Put your form fields here. But for now, just click submit</div>`, and replace it with some inputs:
 
@@ -305,7 +318,7 @@ const NewQuestionPage = () => {
   const router = useRouter()
 
   return (
-    <div className="container">
+    <div>
       <Head>
         <title>New Question</title>
         <link rel="icon" href="/favicon.ico" />
@@ -333,7 +346,7 @@ const NewQuestionPage = () => {
                 },
               })
               alert('Success!' + JSON.stringify(question))
-              router.push('/questions/[id]', `/questions/${question.id}`)
+              router.push('/questions/[questionId]', `/questions/${question.id}`)
             } catch (error) {
               alert('Error creating question ' + JSON.stringify(error, null, 2))
             }
@@ -360,7 +373,7 @@ const NewQuestionPage = () => {
 export default NewQuestionPage
 ```
 
-## Listing choices.
+## Listing choices
 
 Time for a breather. Go back to `http://localhost:3000/questions` in your browser and look at all the questions you‘ve created. How about we list these questions’ choices here too? First, we need to customise the question queries. In Prisma, you need to manually let the client know that you want to query for nested relations. Change your `getQuestion.ts` and `getQuestions.ts` files to look like this:
 
@@ -402,7 +415,7 @@ Now hop back to our main questions page in your editor, and we can list the choi
 
 Magic! Let’s do one more thing–let people vote on these questions!
 
-Open `app/questions/pages/questions/[id].tsx` in your editor. First, we’re going to improve this page somewhat.
+Open `app/questions/pages/questions/[questionId].tsx` in your editor. First, we’re going to improve this page somewhat.
 
 1. Replace `<h1>Question {question.id}</h1>` with `<h1>{question.text}</h1>`.
 
@@ -439,7 +452,7 @@ export default async function updateChoice(args: ChoiceUpdateArgs) {
 }
 ```
 
-Back in `app/questions/pages/questions/[id].tsx`, we can now add a vote button.
+Back in `app/questions/pages/questions/[questionId].tsx`, we can now add a vote button.
 
 In our `li`, add a button like so:
 
@@ -491,8 +504,8 @@ import updateChoice from "app/questions/mutations/updateChoice"
 
 export const Question = () => {
   const router = useRouter()
-  const id = parseInt(router?.query.id as string)
-  const [question] = useQuery(getQuestion, { where: { id } })
+  const questionId = parseInt(router?.query.questionId as string)
+  const [question] = useQuery(getQuestion, { where: { id: questionId } })
 
   const handleVote = async (id, votes) => {
     try {
@@ -518,7 +531,7 @@ export const Question = () => {
         ))}
       </ul>
 
-      <Link href="/questions/[id]/edit" as={`/questions/${question.id}/edit`}>
+      <Link href="/questions/[questionId]/edit" as={`/questions/${question.id}/edit`}>
         <a>Edit</a>
       </Link>
 
@@ -539,7 +552,7 @@ export const Question = () => {
 
 const ShowQuestionPage = () => {
   return (
-    <div className="container">
+    <div>
       <Head>
         <title>Question</title>
         <link rel="icon" href="/favicon.ico" />
@@ -569,8 +582,8 @@ export default ShowQuestionPage
 
 - Adding styling
 - Showing some more statistics about votes
-- Deploying live so you can sent it around (we recommend [Vercel](https://vercel.com/))
+- Deploying live so you can send it around (we recommend [Vercel](https://vercel.com/))
 
 If you want to share your project with the world wide Blitz community there is no better place to do that than on Slack.
 
-Just visit https://slack.blitzjs.com. Then, post the link to the #show-and-tell channel to share it with everyone!
+Just visit https://slack.blitzjs.com. Then, post the link to the **#show-and-tell** channel to share it with everyone!

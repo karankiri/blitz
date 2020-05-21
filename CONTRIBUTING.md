@@ -1,4 +1,4 @@
-![Blitz Contributing Guide](https://files-m3haypbo7.now.sh/contributing.png)
+![Blitz Contributing Guide](https://raw.githubusercontent.com/blitz-js/art/master/contributing-guide.png)
 
 <br>
 
@@ -104,6 +104,7 @@ yarn test
 #### Sync your fork
 
 ```sh
+git remote add upstream git@github.com:blitz-js/blitz.git
 ./scripts/fetchRemote.sh
 git merge upstream/canary
 ```
@@ -144,3 +145,11 @@ cd examples/store
 ## Troubleshooting
 
 If you run into issues that should be documented here, please submit a PR! ❤️
+
+**#### Windows Subsystem for Linux**
+
+`node-pty` error when running `yarn`. Fix by installing `node-pty dependencies`
+
+```
+sudo apt install -y make python build-essential
+```

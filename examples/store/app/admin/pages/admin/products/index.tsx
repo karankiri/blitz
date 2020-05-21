@@ -1,9 +1,9 @@
-import {Suspense} from 'react'
-import {useQuery, Link} from 'blitz'
-import getProducts from 'app/products/queries/getProducts'
+import { Suspense } from "react"
+import { useQuery, Link } from "blitz"
+import getProducts from "app/products/queries/getProducts"
 
 function ProductsList() {
-  const [products] = useQuery(getProducts, {orderBy: {id: 'desc'}})
+  const [products] = useQuery(getProducts, { orderBy: { id: "desc" } })
 
   return (
     <ul>
@@ -18,7 +18,7 @@ function ProductsList() {
   )
 }
 
-export default function () {
+function AdminProducts() {
   return (
     <div>
       <h1>Products</h1>
@@ -28,7 +28,7 @@ export default function () {
           <a>Create Product</a>
         </Link>
         <Link href="/admin">
-          <a style={{marginLeft: 16}}>Admin</a>
+          <a style={{ marginLeft: 16 }}>Admin</a>
         </Link>
       </p>
 
@@ -38,3 +38,5 @@ export default function () {
     </div>
   )
 }
+
+export default AdminProducts
